@@ -12,12 +12,12 @@ const sendEmail = async ({ name, email, message }) => {
   await transporter.sendMail({
     from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
     to: process.env.EMAIL_USER,
-    subject: "📩 New Portfolio Contact Message",
+    subject: `New Contact Message from ${name}`,
     html: `
-      <h3>New Message</h3>
-      <p><strong>Name:</strong> ${name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Message:</strong><br/>${message}</p>
+      <h3>New Portfolio Contact</h3>
+      <p><b>Name:</b> ${name}</p>
+      <p><b>Email:</b> ${email}</p>
+      <p><b>Message:</b> ${message}</p>
     `
   });
 };
