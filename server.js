@@ -3,21 +3,24 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-/* ================= DEBUG ================= */
-console.log("EMAIL_USER loaded:", !!process.env.EMAIL_USER);
-console.log("EMAIL_PASS loaded:", !!process.env.EMAIL_PASS);
-
 /* ================= APP ================= */
 const app = express();
 
-/* ================= CORS (FIXED) ================= */
-app.use(
-  cors({
-    origin: true, // allow all origins (safe for portfolio contact)
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+/* ================= CORS (FIXED FOR EXPRESS 5) ================= */
+app.use(cors({
+  origin: true,               // allow all origins
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
+}));
+
+// ✅ IMPORTANT: handle preflight explicitly
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+  } else {
+    next();
+  }
+});
 
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
