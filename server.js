@@ -3,14 +3,14 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
-/* ================= DEBUG ================= */
+/* ================= SAFE DEBUG ================= */
 console.log("EMAIL_USER loaded:", !!process.env.EMAIL_USER);
 console.log("EMAIL_PASS loaded:", !!process.env.EMAIL_PASS);
 
 /* ================= APP ================= */
 const app = express();
 
-/* ================= CORS CONFIG (FINAL FIX) ================= */
+/* ================= CORS CONFIG ================= */
 const allowedOrigins = [
   "http://localhost:3000",
   "https://ashishjha1-portfolio-git-main-ismartashishs-projects.vercel.app",
@@ -20,21 +20,21 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow Postman / server-to-server
+      // allow requests without origin (Postman, server-to-server)
       if (!origin) return callback(null, true);
 
-      // Allow exact known origins
+      // allow listed origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // ✅ Allow ALL Vercel preview deployments
+      // allow ALL vercel preview deployments
       if (origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
 
-      console.error("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
+      // ❗ DO NOT THROW ERROR (prevents HTML response)
+      return callback(null, false);
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
@@ -42,7 +42,7 @@ app.use(
   })
 );
 
-/* ✅ REQUIRED for preflight */
+// handle preflight requests
 app.options("*", cors());
 
 /* ================= MIDDLEWARE ================= */
@@ -62,7 +62,20 @@ mongoose
 
 /* ================= HEALTH CHECK ================= */
 app.get("/", (req, res) => {
-  res.status(200).send("Portfolio Server Running");
+  res.status(200).json({
+    success: true,
+    message: "Portfolio Server Running"
+  });
+});
+
+/* ================= GLOBAL ERROR HANDLER ================= */
+app.use((err, req, res, next) => {
+  console.error("❌ SERVER ERROR:", err.message);
+
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
 });
 
 /* ================= START SERVER ================= */
