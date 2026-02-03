@@ -16,38 +16,32 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // 1️⃣ Save to DB
+    // 1️⃣ Save to DB (PRIMARY SUCCESS)
     const contact = new Contact({ name, email, message });
     await contact.save();
     console.log("✅ Saved to MongoDB");
 
-    // 2️⃣ Send Email
+    // 2️⃣ Try email (SECONDARY, NEVER BLOCK RESPONSE)
     try {
       await sendEmail({ name, email, message });
       console.log("📧 Email sent");
     } catch (mailError) {
-      console.error("❌ Email failed:", mailError.message);
-
-      // IMPORTANT: still return JSON
-      return res.status(500).json({
-        success: false,
-        message: "Saved but email failed"
-      });
+      console.error("📭 Email skipped:", mailError.message);
+      // ❌ DO NOT return or throw
     }
 
-    // 3️⃣ Success response
+    // 3️⃣ Always return SUCCESS if DB save worked
     return res.status(200).json({
       success: true,
-      message: "Message sent successfully"
+      message: "Message received successfully"
     });
 
   } catch (error) {
     console.error("❌ CONTACT ERROR:", error);
 
-    // 🔥 ALWAYS JSON — never HTML
     return res.status(500).json({
       success: false,
-      message: error.message || "Internal Server Error"
+      message: "Internal Server Error"
     });
   }
 });
