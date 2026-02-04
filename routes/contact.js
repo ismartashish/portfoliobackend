@@ -5,11 +5,10 @@ const sendEmail = require("../utils/sendEmail");
 
 router.post("/", async (req, res) => {
   try {
+    const { name, email, message } = req.body;
     console.log("📩 Contact request:", req.body);
 
-    const { name, email, message } = req.body;
-
-    // ✅ Basic validation
+    // ✅ Validation
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -17,7 +16,6 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // ✅ Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -26,29 +24,25 @@ router.post("/", async (req, res) => {
       });
     }
 
-    // 1️⃣ Save to DB (PRIMARY SUCCESS)
+    // 1️⃣ Save to DB
     await new Contact({ name, email, message }).save();
     console.log("✅ Saved to MongoDB");
 
-    // 2️⃣ Try email (SECONDARY — NEVER FAIL REQUEST)
-    try {
-      await sendEmail({ name, email, message });
-      console.log("📧 Email sent");
-    } catch (mailError) {
-      console.warn("📭 Email skipped:", mailError.message);
-      // ❌ Do NOT throw or return
-    }
-
-    // 3️⃣ Always respond SUCCESS
-    return res.status(200).json({
+    // 2️⃣ RESPOND IMMEDIATELY (THIS IS THE KEY)
+    res.status(200).json({
       success: true,
       message: "Message received successfully"
     });
 
-  } catch (error) {
-    console.error("❌ CONTACT ERROR:", error);
+    // 3️⃣ Fire-and-forget email (cannot affect response)
+    sendEmail({ name, email, message })
+      .then(() => console.log("📧 Email sent"))
+      .catch(err =>
+        console.warn("📭 Email skipped:", err.message)
+      );
 
-    // 🔥 Only real server errors reach here
+  } catch (err) {
+    console.error("❌ CONTACT ERROR:", err);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error"
