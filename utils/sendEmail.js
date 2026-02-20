@@ -1,19 +1,8 @@
 const { Resend } = require("resend");
 
-if (!process.env.RESEND_API_KEY) {
-  console.error("❌ RESEND_API_KEY is missing in environment variables");
-}
-
-if (!process.env.EMAIL_USER) {
-  console.error("❌ EMAIL_USER is missing in environment variables");
-}
-
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ name, email, message }) => {
-  console.log("📨 Attempting to send email...");
-  console.log("To:", process.env.EMAIL_USER);
-
   try {
     const data = await resend.emails.send({
       from: "onboarding@resend.dev",
@@ -27,13 +16,11 @@ const sendEmail = async ({ name, email, message }) => {
       `,
     });
 
-    console.log("✅ Email sent successfully!");
-    console.log("Resend Response:", data);
-
+    console.log("✅ Email sent:", data);
     return data;
+
   } catch (error) {
-    console.error("❌ EMAIL SEND FAILED");
-    console.error(error);
+    console.error("❌ Email error:", error);
     throw error;
   }
 };
