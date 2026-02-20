@@ -17,6 +17,9 @@ app.use(
 app.use(express.json());
 
 app.use("/api/contact", require("./routes/contact"));
+console.log("ENV CHECK:");
+console.log("RESEND_API_KEY:", process.env.RESEND_API_KEY);
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
 
 app.get("/", (req, res) => {
   res.status(200).send("🚀 Portfolio Server Running");
