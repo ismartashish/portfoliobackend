@@ -1,10 +1,6 @@
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const sendEmail = async ({ name, email, message }) => {
   try {
-    await resend.emails.send({
+    const response = await resend.emails.send({
       from: "onboarding@resend.dev",
       to: process.env.EMAIL_USER,
       subject: `New Contact Message from ${name}`,
@@ -16,10 +12,8 @@ const sendEmail = async ({ name, email, message }) => {
       `,
     });
 
-    console.log("📧 Email sent successfully");
+    console.log("Resend Response:", response);
   } catch (error) {
-    console.error("❌ Email error:", error.message);
+    console.error("FULL EMAIL ERROR:", error);
   }
 };
-
-module.exports = sendEmail;
